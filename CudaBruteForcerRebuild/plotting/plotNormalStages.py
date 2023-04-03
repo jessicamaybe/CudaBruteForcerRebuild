@@ -4,6 +4,12 @@ from colorMap import *
 from getData import *
 
 import matplotlib
+
+genpng = False
+if("--genpng" in  sys.argv):
+    genpng = True
+    mpl.use('Agg')
+
 from matplotlib import pyplot as plt
 
 
@@ -36,9 +42,6 @@ def update_image_plot(implot, img, pauseRate : float, colmap : clrs.LinearSegmen
     plt.pause(pauseRate)
     return implot
 
-genpng = False
-if("--genpng" in  sys.argv):
-    genpng = True
 
 fileName = "normalStagesReached_4_3_22_21.bin"
 if("--filename" in  sys.argv):
