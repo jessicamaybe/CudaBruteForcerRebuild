@@ -3,7 +3,7 @@ import numpy as np
 from colorMap import *
 from getData import *
 
-import matplotlib
+import matplotlib as mpl
 
 genpng = False
 if("--genpng" in  sys.argv):
