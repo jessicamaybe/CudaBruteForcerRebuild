@@ -1,3 +1,4 @@
+import sys
 import numpy as np
 from colorMap import *
 from getData import *
@@ -7,22 +8,22 @@ from matplotlib import pyplot as plt
 
 
 def setupPlot(plotArray, sampleIdx, rParams : RangeParameters, nStages, pauseRate, usePara, colmap):
-    implot = plt.imshow(plotArray[sampleIdx,:,:].transpose(), 
-                   cmap=colmap, interpolation='nearest', origin='upper',
-                   extent=rParams.getExtents(usePara),
-                   vmin=-1 if usePara else 0, vmax=nStages-1)
-    plt.colorbar()    
+    implot = plt.imshow(plotArray[sampleIdx,:,:].transpose(),
+                        cmap=colmap, interpolation='nearest', origin='upper',
+                        extent=rParams.getExtents(usePara),
+                        vmin=-1 if usePara else 0, vmax=nStages-1)
+    plt.colorbar()
     plt.xlabel("nX")
     plt.xticks(np.arange(rParams.minNX, rParams.maxNX + rParams.getXStepSize(), rParams.getXStepSize()*20))
 
     if rParams.useZXSum and not usePara:
-        plt.ylabel("|nZ| + |nX|")     
+        plt.ylabel("|nZ| + |nX|")
         plt.yticks(np.arange(rParams.maxNZXSum, rParams.minNZXSum - rParams.getZStepSize(), -rParams.getZStepSize()*10))
     else:
         plt.ylabel("nZ")
-        minZBound, maxZBound = rParams.computeZBounds()     
+        minZBound, maxZBound = rParams.computeZBounds()
         plt.yticks(np.arange(maxZBound, minZBound - rParams.getZStepSize(), -rParams.getZStepSize()*10))
-    
+
     plt.title('nY = ' + str(round(sampleIdx * rParams.getYStepSize() + rParams.minNY,5)))
 
     return implot
@@ -35,9 +36,18 @@ def update_image_plot(implot, img, pauseRate : float, colmap : clrs.LinearSegmen
     plt.pause(pauseRate)
     return implot
 
+genpng = False
+if("--genpng" in  sys.argv):
+    genpng = True
 
+fileName = "normalStagesReached_4_3_22_21.bin"
+if("--filename" in  sys.argv):
+    fileName = sys.argv[sys.argv.index("--filename") + 1]
+
+
+print(fileName)
 folderName = "../output/"
-fileName = "normalStagesReached_4_3_13_21.bin"
+
 
 # folderName = "../output/ElevationRuns/"
 # fileName = "platformHWRs_2_8_1_48.bin"
@@ -63,7 +73,7 @@ foundHeightDifference = False
 
 if fileName.startswith("norm"):
     plotArr = getIntDataFromBinaryFile(fileName, folderName=folderName, nSamplesY=rangeParameters.nSamplesNY, nSamplesX=rangeParameters.nSamplesNX, nSamplesZ=rangeParameters.nSamplesNZ)
-    
+
     try:
         file, folder = getCorrespondingHeightDiffFilenameAndFolderPath(folderName + fileName)
         heightDiffArr = getFloatDataFromBinaryFile(file, folder, rangeParameters.nSamplesNY, rangeParameters.nSamplesNX, rangeParameters.nSamplesNZ)
@@ -73,7 +83,7 @@ if fileName.startswith("norm"):
                 for k in range(rangeParameters.nSamplesNZ):
                     if(plotArr[i,j,k] == 8):
                         plotArrH[i,j,k] = 9 - min(0.01 * heightDiffArr[i,j,k], 1.0)
-        
+
         foundHeightDifference = True
     except:
         print("Couldn't Locate Height Difference File at \'" + folder + file + "\' or encountered other error; Skipping")
@@ -90,22 +100,29 @@ if(useParallelogram):
     plotArrH = getDataAsParallelogram(plotArrH)
 
 numStages = 10
-pauseRate = 0.05 
+pauseRate = 0.05
 
 if fileName.startswith("norm"):
     colormap = CM_MARBLER if not useParallelogram else CM_MARBLER_PARA
     if foundHeightDifference:
         colormapH = CM_HEIGHT_GRADIENT if not useParallelogram else CM_HEIGHT_GRADIENT_PARA
 elif fileName.startswith("plat"):
-    colormap = CM_HWR_BANDS 
+    colormap = CM_HWR_BANDS
 elif fileName.startswith("minUp"):
     colormap = CM_UPWARP_SPEED
 else:
     colormap = CM_DEFAULT
 
 implot = setupPlot(plotArr, 0, rangeParameters, numStages, pauseRate, useParallelogram, colormap)
+
+count = 0
 for ny in range(rangeParameters.nSamplesNY):
     update_image_plot(implot, plotArr[ny,:,:].transpose(), pauseRate, colormap, 'nY = ' + str(round(ny * rangeParameters.getYStepSize() + rangeParameters.minNY,5)))
+    if genpng:
+        plt.savefig('test' + str(count) + '.png')
+        count = count + 1
+if genpng:
+    quit()
 
 useHeightDiff = False
 
@@ -118,7 +135,7 @@ while(True):
         if sample >= rangeParameters.nSamplesNY:
             print("Sample index is too high! Please enter a lower sample index!")
             continue
-        
+
         if not plt.get_fignums():
             implot = setupPlot(plotArrH if useHeightDiff else plotArr, sample, rangeParameters, numStages, pauseRate, useParallelogram, colormapH if useHeightDiff else colormap)
 
@@ -126,7 +143,7 @@ while(True):
             update_image_plot(implot, plotArrH[sample,:,:].transpose(), pauseRate, colormapH, 'nY = ' + str(round(sample * rangeParameters.getYStepSize() + rangeParameters.minNY,5)))
         else:
             update_image_plot(implot, plotArr[sample,:,:].transpose(), pauseRate, colormap, 'nY = ' + str(round(sample * rangeParameters.getYStepSize() + rangeParameters.minNY,5)))
-    
+
         plt.pause(pauseRate)
 
         continue
@@ -149,12 +166,13 @@ while(True):
         if not plt.get_fignums():
             implot = setupPlot(plotArrH if useHeightDiff else plotArr, 0, rangeParameters, numStages, pauseRate, useParallelogram, colormapH if useHeightDiff else colormap)
 
+        count = 0
         for ny in range(rangeParameters.nSamplesNY):
+
             if useHeightDiff:
                 update_image_plot(implot, plotArrH[ny,:,:].transpose(), pauseRate, colormapH, 'nY = ' + str(round(ny * rangeParameters.getYStepSize() + rangeParameters.minNY,5)))
             else:
-                update_image_plot(implot, plotArr[ny,:,:].transpose(), pauseRate, colormap, 'nY = ' + str(round(ny * rangeParameters.getYStepSize() + rangeParameters.minNY,5))) 
-        
+                update_image_plot(implot, plotArr[ny,:,:].transpose(), pauseRate, colormap, 'nY = ' + str(round(ny * rangeParameters.getYStepSize() + rangeParameters.minNY,5)))
         continue
 
 
@@ -178,7 +196,7 @@ while(True):
             print("Height difference file couldn't be loaded; please ensure height difference file is present and named correctly.")
 
         continue
-    
+
     print("Command not recognized! Please type 'help' for a list of valid commands.\n")
 
 
