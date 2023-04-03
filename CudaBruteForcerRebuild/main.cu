@@ -6,6 +6,7 @@
 #include <unordered_map>
 #include <ctime>
 #include <chrono>
+#include <vector>
 
 #include "cuda.h"
 #include "cuda_runtime.h"

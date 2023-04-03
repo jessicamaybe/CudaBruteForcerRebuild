@@ -5,6 +5,7 @@
 #include <cstring>
 #include <string>
 #include <unordered_map>
+#include <limits>
 
 #include "cuda.h"
 #include "cuda_runtime.h"
