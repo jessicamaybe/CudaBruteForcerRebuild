@@ -35,7 +35,7 @@ def setupPlot(plotArray, sampleIdx, rParams : RangeParameters, nStages, pauseRat
     return implot
 
 
-def update_image_plot(implot, img, pauseRate, title=''):
+def update_image_plot(implot, img, pauseRate : float, colmap : clrs.LinearSegmentedColormap, title=''):
     implot.set_array(img)
     implot.set(cmap=colmap)
     plt.title(title)
