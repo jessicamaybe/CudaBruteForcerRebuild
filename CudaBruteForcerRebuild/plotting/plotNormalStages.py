@@ -5,9 +5,9 @@ from getData import *
 
 import matplotlib as mpl
 
-gensvg = False
-if("--gensvg" in  sys.argv):
-    gensvg = True
+genpng = False
+if("--genpng" in  sys.argv):
+    genpng = True
     mpl.use('Agg')
 
 from matplotlib import pyplot as plt
@@ -120,10 +120,10 @@ implot = setupPlot(plotArr, 0, rangeParameters, numStages, pauseRate, useParalle
 count = 0
 for ny in range(rangeParameters.nSamplesNY):
     update_image_plot(implot, plotArr[ny,:,:].transpose(), pauseRate, colormap, 'nY = ' + str(round(ny * rangeParameters.getYStepSize() + rangeParameters.minNY,5)))
-    if gensvg:
-        plt.savefig('test' + str(count) + '.svg', bbox_inches='tight')
+    if genpng:
+        plt.savefig('test' + str(count) + '.png', bbox_inches='tight')
         count = count + 1
-if gensvg:
+if genpng:
     quit()
 
 useHeightDiff = False
