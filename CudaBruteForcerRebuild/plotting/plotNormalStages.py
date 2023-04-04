@@ -50,7 +50,6 @@ if("--filename" in  sys.argv):
 
 print(fileName)
 folderName = "../output/"
-fileName = "normalStagesReached_3_27_23_55.bin"
 
 # folderName = "../output/ElevationRuns/"
 # fileName = "platformHWRs_2_8_1_48.bin"
