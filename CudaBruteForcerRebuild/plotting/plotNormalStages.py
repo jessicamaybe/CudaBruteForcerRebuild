@@ -1,13 +1,20 @@
+import sys
 import numpy as np
 from colorMap import *
 from getData import *
 
-import matplotlib
+import matplotlib as mpl
+
+genpng = False
+if("--genpng" in  sys.argv):
+    genpng = True
+    mpl.use('Agg')
+
 from matplotlib import pyplot as plt
 
 
 def setupPlot(plotArray, sampleIdx, rParams : RangeParameters, nStages, pauseRate, usePara, colmap):
-    implot = plt.imshow(plotArray[sampleIdx,:,:].transpose(), 
+    implot = plt.imshow(plotArray[sampleIdx,:,:].transpose(),
                    cmap=colmap, interpolation='nearest', origin='upper',
                    extent=rParams.getExtents(usePara),
                    vmin=-1 if usePara else 0, vmax=nStages-1)
@@ -28,7 +35,7 @@ def setupPlot(plotArray, sampleIdx, rParams : RangeParameters, nStages, pauseRat
     return implot
 
 
-def update_image_plot(implot, img, pauseRate : float, colmap : clrs.LinearSegmentedColormap, title=''):
+def update_image_plot(implot, img, pauseRate, title=''):
     implot.set_array(img)
     implot.set(cmap=colmap)
     plt.title(title)
@@ -36,8 +43,14 @@ def update_image_plot(implot, img, pauseRate : float, colmap : clrs.LinearSegmen
     return implot
 
 
+fileName = "normalStagesReached_4_3_22_21.bin"
+if("--filename" in  sys.argv):
+    fileName = sys.argv[sys.argv.index("--filename") + 1]
+
+
+print(fileName)
 folderName = "../output/"
-fileName = "normalStagesReached_3_31_0_31.bin"
+fileName = "normalStagesReached_3_27_23_55.bin"
 
 # folderName = "../output/ElevationRuns/"
 # fileName = "platformHWRs_2_8_1_48.bin"
@@ -73,7 +86,7 @@ if fileName.startswith("norm"):
                 for k in range(rangeParameters.nSamplesNZ):
                     if(plotArr[i,j,k] == 8):
                         plotArrH[i,j,k] = 9 - min(0.01 * heightDiffArr[i,j,k], 1.0)
-        
+
         foundHeightDifference = True
     except:
         print("Couldn't Locate Height Difference File at \'" + folder + file + "\' or encountered other error; Skipping")
@@ -104,8 +117,15 @@ else:
     colormap = CM_DEFAULT
 
 implot = setupPlot(plotArr, 0, rangeParameters, numStages, pauseRate, useParallelogram, colormap)
+
+count = 0
 for ny in range(rangeParameters.nSamplesNY):
     update_image_plot(implot, plotArr[ny,:,:].transpose(), pauseRate, colormap, 'nY = ' + str(round(ny * rangeParameters.getYStepSize() + rangeParameters.minNY,5)))
+    if genpng:
+        plt.savefig('test' + str(count) + '.png')
+        count = count + 1
+if genpng:
+    quit()
 
 useHeightDiff = False
 
@@ -118,7 +138,7 @@ while(True):
         if sample >= rangeParameters.nSamplesNY:
             print("Sample index is too high! Please enter a lower sample index!")
             continue
-        
+
         if not plt.get_fignums():
             implot = setupPlot(plotArrH if useHeightDiff else plotArr, sample, rangeParameters, numStages, pauseRate, useParallelogram, colormapH if useHeightDiff else colormap)
 
@@ -153,8 +173,8 @@ while(True):
             if useHeightDiff:
                 update_image_plot(implot, plotArrH[ny,:,:].transpose(), pauseRate, colormapH, 'nY = ' + str(round(ny * rangeParameters.getYStepSize() + rangeParameters.minNY,5)))
             else:
-                update_image_plot(implot, plotArr[ny,:,:].transpose(), pauseRate, colormap, 'nY = ' + str(round(ny * rangeParameters.getYStepSize() + rangeParameters.minNY,5))) 
-        
+                update_image_plot(implot, plotArr[ny,:,:].transpose(), pauseRate, colormap, 'nY = ' + str(round(ny * rangeParameters.getYStepSize() + rangeParameters.minNY,5)))
+
         continue
 
 

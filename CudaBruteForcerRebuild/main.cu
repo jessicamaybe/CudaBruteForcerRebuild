@@ -6,6 +6,7 @@
 #include <unordered_map>
 #include <ctime>
 #include <chrono>
+#include <vector>
 
 #include "cuda.h"
 #include "cuda_runtime.h"
@@ -496,6 +497,7 @@ int main(int argc, char* argv[])
     free(host_norms);
     cudaFree(dev_tris);
     cudaFree(dev_norms);
+    wf.flush();
     wf.close();
 
     std::cout << "Writing output to file!\n";
@@ -504,16 +506,19 @@ int main(int argc, char* argv[])
     {
         wfns.write(normalStages, normals.size() * nSamplesNY * nSamplesNX * nSamplesNZ);
         free(normalStages);
+        wfns.flush();
         wfns.close();
 
         wffhds.write(reinterpret_cast<const char*>(finalHeightDiffs), normals.size() * nSamplesNY * nSamplesNX * nSamplesNZ * sizeof(float));
         free(finalHeightDiffs);
+        wffhds.flush();
         wffhds.close();
     }
     else
     {
         wfphwrs.write(reinterpret_cast<const char*>(platformHWRs), normals.size() * nSamplesNY * nSamplesNX * nSamplesNZ * sizeof(float));
         free(platformHWRs);
+        wfphwrs.flush();
         wfphwrs.close();
     }
 
