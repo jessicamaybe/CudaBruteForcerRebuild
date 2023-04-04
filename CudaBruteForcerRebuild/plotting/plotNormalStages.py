@@ -121,7 +121,7 @@ count = 0
 for ny in range(rangeParameters.nSamplesNY):
     update_image_plot(implot, plotArr[ny,:,:].transpose(), pauseRate, colormap, 'nY = ' + str(round(ny * rangeParameters.getYStepSize() + rangeParameters.minNY,5)))
     if genpng:
-        plt.savefig('test' + str(count) + '.png', bbox_inches='tight')
+        plt.savefig('test' + str(count) + '.png')
         count = count + 1
 if genpng:
     quit()
